@@ -52,6 +52,8 @@ This is not yet possible, but I'll naturally update this documentation when it i
 ## Notes
 
 - If linking fails looking for `gflags::SetCommandLineOption(char const*, char const*)`, make sure you don't have `devel/gflags` installed. For more information, check out [this post](https://marc.info/?l=freebsd-ports-bugs&m=152757275115239&w=2) on the `freebsd-ports-bugs` mailing list.
+- If you get a `could not find PythonLibsUnix` error, you most likely don't have the required version of Python.
+- If the necessary Python version doesn't come with PIP, you can bootstrap it with [`get-pip.py`](https://bootstrap.pypa.io/get-pip.py).
 
 ## Original README
 

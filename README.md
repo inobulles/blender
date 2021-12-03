@@ -11,7 +11,47 @@ This repository is a fork of Blender which (will) add a few nice integrations wi
 
 ## Building on aquaBSD
 
-Coming soon!
+On an aquaBSD installation, necessary dependencies should already be installed, and if one of them is not, please file an issue on this repository so I can think up a solution.
+Individual steps are detailed in the `build.sh` script.
+If on aquaBSD, you can also run it directly *as a user, not as root*:
+
+```sh
+% sh build.sh
+```
+
+## Iterative builds
+
+If developing or testing changes to the source, it is first of all strongly recommended to actually understand `build.sh`.
+Once the build environment is configured though, it should only be a matter of re-running the `make` command in the `build/` directory:
+
+```sh
+% cd build
+% numthreads=$(sysctl -n hw.ncpu)
+% make -j$numthreads
+```
+
+If you want **<span style="color:red">c</span><span style="color:orange">o</span><span style="color:yellow">l</span><span style="color:lime">o</span><span style="color:green">u</span><span style="color:cyan">r</span><span style="color:blue">e</span><span style="color:purple">d</span>** output, run `make` without the argument.
+Build times will be longer, however, but a small price to pay for coloured output.
+
+## Running the output
+
+Install the files needed for Blender (don't worry, this will only install in your build directory!):
+
+```sh
+% cd build
+% make install
+```
+
+Then, your final binary should be in `build/bin/blender`.
+Enjoy!
+
+## Packaging as a ZPK
+
+This is not yet possible, but I'll naturally update this documentation when it is.
+
+## Notes
+
+- If linking fails looking for `gflags::SetCommandLineOption(char const*, char const*)`, make sure you don't have `devel/gflags` installed. For more information, check out [this post](https://marc.info/?l=freebsd-ports-bugs&m=152757275115239&w=2) on the `freebsd-ports-bugs` mailing list.
 
 ## Original README
 

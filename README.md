@@ -42,6 +42,7 @@ Install the files needed for Blender (don't worry, this will only install in you
 % make install
 ```
 
+This process should only take about 10 minutes.
 Then, your final binary should be in `build/bin/blender`.
 Enjoy!
 

@@ -1665,8 +1665,8 @@ static int view2d_smoothview_invoke(bContext *C, wmOperator *UNUSED(op), const w
     step = 1.0f;
   }
 
-  /* end timer */
-  if (step >= 1.0f) {
+  /* if we're close enough to our target, end timer */
+  if (BLI_rctf_compare(&v2d->cur, &sms->new_cur, (sms->new_cur.xmax - sms->new_cur.xmin) / 100)) {
     v2d->cur = sms->new_cur;
 
     MEM_freeN(v2d->sms);

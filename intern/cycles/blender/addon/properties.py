@@ -1433,13 +1433,19 @@ class CyclesPreferences(bpy.types.AddonPreferences):
             col.label(text="No compatible GPUs found for Cycles", icon='INFO')
 
             if device_type == 'CUDA':
-                col.label(text="Requires NVIDIA GPU with compute capability 3.0", icon='BLANK1')
+                col.label(text="Requires NVIDIA GPU with compute capability 3.0,", icon='BLANK1')
+                col.label(text="which aquaBSD does not currently support.", icon='BLANK1')
+                col.label(text="At some indeterminate point in the future, it might.", icon='BLANK1')
             elif device_type == 'OPTIX':
-                col.label(text="Requires NVIDIA GPU with compute capability 5.0", icon='BLANK1')
-                col.label(text="and NVIDIA driver version 470 or newer", icon='BLANK1')
+                col.label(text="Requires NVIDIA GPU with compute capability 5.0,", icon='BLANK1')
+                col.label(text="which aquaBSD does not currently support.", icon='BLANK1')
+                col.label(text="At some indeterminate point in the future, it might.", icon='BLANK1')
+                col.label(text="Also requires NVIDIA driver version 470 or newer.", icon='BLANK1')
             elif device_type == 'HIP':
                 import sys
-                col.label(text="Requires discrete AMD GPU with RDNA architecture", icon='BLANK1')
+                col.label(text="Requires discrete AMD GPU with RDNA architecture,", icon='BLANK1')
+                col.label(text="which aquaBSD does not currently support.", icon='BLANK1')
+                col.label(text="Support is actively being worked on, however!", icon='BLANK1')
                 if sys.platform[:3] == "win":
                     col.label(text="and AMD Radeon Pro 21.Q4 driver or newer", icon='BLANK1')
             return

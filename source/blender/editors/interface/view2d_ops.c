@@ -185,8 +185,8 @@ static void view_pan_apply_ex(bContext *C, v2dViewPanData *vpd, float dx, float 
 static void view_pan_apply(bContext *C, wmOperator *op)
 {
   v2dViewPanData *vpd = op->customdata;
-
-  view_pan_apply_ex(C, vpd, RNA_int_get(op->ptr, "deltax"), RNA_int_get(op->ptr, "deltay"));
+  view_pan_apply_ex(
+    C, vpd, RNA_int_get(op->ptr, "deltax"), RNA_int_get(op->ptr, "deltay"));
 }
 
 /* Cleanup temp custom-data. */
@@ -691,6 +691,13 @@ static void view_zoomdrag_init(bContext *C, wmOperator *op)
   vzd->v2d->flag |= V2D_IS_NAVIGATING;
 }
 
+/* need this type to be complete for view_zoomstep_apply_ex */
+struct SmoothView2DStore {
+  rctf orig_cur, new_cur;
+
+  double time_allowed;
+};
+
 /* apply transform to view (i.e. adjust 'cur' rect) */
 static void view_zoomstep_apply_ex(bContext *C,
                                    v2dViewZoomData *vzd,
@@ -700,7 +707,13 @@ static void view_zoomstep_apply_ex(bContext *C,
 {
   ARegion *region = CTX_wm_region(C);
   View2D *v2d = &region->v2d;
+
   rctf cur_new = v2d->cur;
+
+  if (v2d->smooth_timer) {
+    memcpy(&cur_new, &v2d->sms->new_cur, sizeof cur_new);
+  }
+
   const int snap_test = ED_region_snap_size_test(region);
 
   /* calculate amount to move view by, ensuring symmetry so the
@@ -804,7 +817,7 @@ static void view_zoomstep_apply(bContext *C, wmOperator *op)
   const int smooth_viewtx = WM_operator_smooth_viewtx_get(op);
   v2dViewZoomData *vzd = op->customdata;
   view_zoomstep_apply_ex(
-      C, vzd, RNA_float_get(op->ptr, "zoomfacx"), RNA_float_get(op->ptr, "zoomfacy"), smooth_viewtx);
+    C, vzd, RNA_float_get(op->ptr, "zoomfacx"), RNA_float_get(op->ptr, "zoomfacy"), smooth_viewtx);
 }
 
 /** \} */
@@ -822,7 +835,7 @@ static void view_zoomstep_exit(wmOperator *op)
   MEM_SAFE_FREE(op->customdata);
 }
 
-#define ZOOM_FACTOR (0.0375f * 5)
+#define ZOOM_FACTOR (0.0375f * 3)
 
 /* this operator only needs this single callback, where it calls the view_zoom_*() methods */
 static int view_zoomin_exec(bContext *C, wmOperator *op)
@@ -1530,12 +1543,6 @@ static void VIEW2D_OT_ndof(wmOperatorType *ot)
 /** \name Smooth View Operator
  * \{ */
 
-struct SmoothView2DStore {
-  rctf orig_cur, new_cur;
-
-  double time_allowed;
-};
-
 /**
  * function to get a factor out of a rectangle
  *
@@ -1610,7 +1617,7 @@ void UI_view2d_smooth_view(bContext *C, ARegion *region, const rctf *cur, const 
       sms.time_allowed = (double)smooth_viewtx / 1000.0;
 
       /* scale the time allowed the change in view */
-      sms.time_allowed *= (double)fac;
+      sms.time_allowed *= (double)fac * 100; // XXX makes long animations work better
 
       /* keep track of running timer! */
       if (v2d->sms == NULL) {
@@ -1672,10 +1679,11 @@ static int view2d_smoothview_invoke(bContext *C, wmOperator *UNUSED(op), const w
     WM_event_add_mousemove(win);
   }
   else {
-    /* ease in/out */
-    step = (3.0f * step * step - 2.0f * step * step * step);
+    v2d->cur.xmin += (sms->new_cur.xmin - v2d->cur.xmin) * 0.5;
+    v2d->cur.ymin += (sms->new_cur.ymin - v2d->cur.ymin) * 0.5;
 
-    BLI_rctf_interp(&v2d->cur, &sms->orig_cur, &sms->new_cur, step);
+    v2d->cur.xmax += (sms->new_cur.xmax - v2d->cur.xmax) * 0.5;
+    v2d->cur.ymax += (sms->new_cur.ymax - v2d->cur.ymax) * 0.5;
   }
 
   UI_view2d_curRect_changed(C, v2d);

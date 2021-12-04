@@ -695,11 +695,12 @@ static void view_zoomdrag_init(bContext *C, wmOperator *op)
 static void view_zoomstep_apply_ex(bContext *C,
                                    v2dViewZoomData *vzd,
                                    const float facx,
-                                   const float facy)
+                                   const float facy,
+                                   const int smooth_viewtx)
 {
   ARegion *region = CTX_wm_region(C);
   View2D *v2d = &region->v2d;
-  const rctf cur_old = v2d->cur;
+  rctf cur_new = v2d->cur;
   const int snap_test = ED_region_snap_size_test(region);
 
   /* calculate amount to move view by, ensuring symmetry so the
@@ -707,88 +708,85 @@ static void view_zoomstep_apply_ex(bContext *C,
    */
   float dx, dy;
   if (facx >= 0.0f) {
-    dx = BLI_rctf_size_x(&v2d->cur) * facx;
-    dy = BLI_rctf_size_y(&v2d->cur) * facy;
+    dx = BLI_rctf_size_x(&cur_new) * facx;
+    dy = BLI_rctf_size_y(&cur_new) * facy;
   }
   else {
-    dx = (BLI_rctf_size_x(&v2d->cur) / (1.0f + 2.0f * facx)) * facx;
-    dy = (BLI_rctf_size_y(&v2d->cur) / (1.0f + 2.0f * facy)) * facy;
+    dx = (BLI_rctf_size_x(&cur_new) / (1.0f + 2.0f * facx)) * facx;
+    dy = (BLI_rctf_size_y(&cur_new) / (1.0f + 2.0f * facy)) * facy;
   }
 
   /* only resize view on an axis if change is allowed */
   if ((v2d->keepzoom & V2D_LOCKZOOM_X) == 0) {
     if (v2d->keepofs & V2D_LOCKOFS_X) {
-      v2d->cur.xmax -= 2 * dx;
+      cur_new.xmax -= 2 * dx;
     }
     else if (v2d->keepofs & V2D_KEEPOFS_X) {
       if (v2d->align & V2D_ALIGN_NO_POS_X) {
-        v2d->cur.xmin += 2 * dx;
+        cur_new.xmin += 2 * dx;
       }
       else {
-        v2d->cur.xmax -= 2 * dx;
+        cur_new.xmax -= 2 * dx;
       }
     }
     else {
 
-      v2d->cur.xmin += dx;
-      v2d->cur.xmax -= dx;
+      cur_new.xmin += dx;
+      cur_new.xmax -= dx;
 
       if (vzd->zoom_to_mouse_pos) {
         /* get zoom fac the same way as in
          * ui_view2d_curRect_validate_resize - better keep in sync! */
-        const float zoomx = (float)(BLI_rcti_size_x(&v2d->mask) + 1) / BLI_rctf_size_x(&v2d->cur);
+        const float zoomx = (float)(BLI_rcti_size_x(&v2d->mask) + 1) / BLI_rctf_size_x(&cur_new);
 
         /* only move view to mouse if zoom fac is inside minzoom/maxzoom */
         if (((v2d->keepzoom & V2D_LIMITZOOM) == 0) ||
             IN_RANGE_INCL(zoomx, v2d->minzoom, v2d->maxzoom)) {
-          const float mval_fac = (vzd->mx_2d - cur_old.xmin) / BLI_rctf_size_x(&cur_old);
+          const float mval_fac = (vzd->mx_2d - v2d->cur.xmin) / BLI_rctf_size_x(&v2d->cur);
           const float mval_faci = 1.0f - mval_fac;
           const float ofs = (mval_fac * dx) - (mval_faci * dx);
 
-          v2d->cur.xmin += ofs;
-          v2d->cur.xmax += ofs;
+          cur_new.xmin += ofs;
+          cur_new.xmax += ofs;
         }
       }
     }
   }
   if ((v2d->keepzoom & V2D_LOCKZOOM_Y) == 0) {
     if (v2d->keepofs & V2D_LOCKOFS_Y) {
-      v2d->cur.ymax -= 2 * dy;
+      cur_new.ymax -= 2 * dy;
     }
     else if (v2d->keepofs & V2D_KEEPOFS_Y) {
       if (v2d->align & V2D_ALIGN_NO_POS_Y) {
-        v2d->cur.ymin += 2 * dy;
+        cur_new.ymin += 2 * dy;
       }
       else {
-        v2d->cur.ymax -= 2 * dy;
+        cur_new.ymax -= 2 * dy;
       }
     }
     else {
 
-      v2d->cur.ymin += dy;
-      v2d->cur.ymax -= dy;
+      cur_new.ymin += dy;
+      cur_new.ymax -= dy;
 
       if (vzd->zoom_to_mouse_pos) {
         /* get zoom fac the same way as in
          * ui_view2d_curRect_validate_resize - better keep in sync! */
-        const float zoomy = (float)(BLI_rcti_size_y(&v2d->mask) + 1) / BLI_rctf_size_y(&v2d->cur);
+        const float zoomy = (float)(BLI_rcti_size_y(&v2d->mask) + 1) / BLI_rctf_size_y(&cur_new);
 
         /* only move view to mouse if zoom fac is inside minzoom/maxzoom */
         if (((v2d->keepzoom & V2D_LIMITZOOM) == 0) ||
             IN_RANGE_INCL(zoomy, v2d->minzoom, v2d->maxzoom)) {
-          const float mval_fac = (vzd->my_2d - cur_old.ymin) / BLI_rctf_size_y(&cur_old);
+          const float mval_fac = (vzd->my_2d - v2d->cur.ymin) / BLI_rctf_size_y(&v2d->cur);
           const float mval_faci = 1.0f - mval_fac;
           const float ofs = (mval_fac * dy) - (mval_faci * dy);
 
-          v2d->cur.ymin += ofs;
-          v2d->cur.ymax += ofs;
+          cur_new.ymin += ofs;
+          cur_new.ymax += ofs;
         }
       }
     }
   }
-
-  /* Inform v2d about changes after this operation. */
-  UI_view2d_curRect_changed(C, v2d);
 
   if (ED_region_snap_size_apply(region, snap_test)) {
     ScrArea *area = CTX_wm_area(C);
@@ -798,14 +796,15 @@ static void view_zoomstep_apply_ex(bContext *C,
 
   /* request updates to be done... */
   ED_region_tag_redraw_no_rebuild(vzd->region);
-  UI_view2d_sync(CTX_wm_screen(C), CTX_wm_area(C), v2d, V2D_LOCK_COPY);
+  UI_view2d_smooth_view(C, region, &cur_new, smooth_viewtx);
 }
 
 static void view_zoomstep_apply(bContext *C, wmOperator *op)
 {
+  const int smooth_viewtx = WM_operator_smooth_viewtx_get(op);
   v2dViewZoomData *vzd = op->customdata;
   view_zoomstep_apply_ex(
-      C, vzd, RNA_float_get(op->ptr, "zoomfacx"), RNA_float_get(op->ptr, "zoomfacy"));
+      C, vzd, RNA_float_get(op->ptr, "zoomfacx"), RNA_float_get(op->ptr, "zoomfacy"), smooth_viewtx);
 }
 
 /** \} */
@@ -823,6 +822,8 @@ static void view_zoomstep_exit(wmOperator *op)
   MEM_SAFE_FREE(op->customdata);
 }
 
+#define ZOOM_FACTOR (0.0375f * 5)
+
 /* this operator only needs this single callback, where it calls the view_zoom_*() methods */
 static int view_zoomin_exec(bContext *C, wmOperator *op)
 {
@@ -834,8 +835,8 @@ static int view_zoomin_exec(bContext *C, wmOperator *op)
   view_zoom_axis_lock_defaults(C, do_zoom_xy);
 
   /* set RNA-Props - zooming in by uniform factor */
-  RNA_float_set(op->ptr, "zoomfacx", do_zoom_xy[0] ? 0.0375f : 0.0f);
-  RNA_float_set(op->ptr, "zoomfacy", do_zoom_xy[1] ? 0.0375f : 0.0f);
+  RNA_float_set(op->ptr, "zoomfacx", do_zoom_xy[0] ? ZOOM_FACTOR : 0.0f);
+  RNA_float_set(op->ptr, "zoomfacy", do_zoom_xy[1] ? ZOOM_FACTOR : 0.0f);
 
   /* apply movement, then we're done */
   view_zoomstep_apply(C, op);
@@ -898,8 +899,8 @@ static int view_zoomout_exec(bContext *C, wmOperator *op)
   view_zoom_axis_lock_defaults(C, do_zoom_xy);
 
   /* set RNA-Props - zooming in by uniform factor */
-  RNA_float_set(op->ptr, "zoomfacx", do_zoom_xy[0] ? -0.0375f : 0.0f);
-  RNA_float_set(op->ptr, "zoomfacy", do_zoom_xy[1] ? -0.0375f : 0.0f);
+  RNA_float_set(op->ptr, "zoomfacx", do_zoom_xy[0] ? -ZOOM_FACTOR : 0.0f);
+  RNA_float_set(op->ptr, "zoomfacy", do_zoom_xy[1] ? -ZOOM_FACTOR : 0.0f);
 
   /* apply movement, then we're done */
   view_zoomstep_apply(C, op);

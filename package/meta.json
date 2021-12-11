@@ -13,7 +13,7 @@
 	// what to do when the application is run
 	
 	"start": "system",
-	"script": "default.sh",
+	"entry": "entry.sh",
 
 	// events (integration with really anything, e.g. aquaBSD Files)
 	// some of these events will automatically be turned into actions too

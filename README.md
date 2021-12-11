@@ -46,9 +46,11 @@ This process should only take about 10 minutes.
 Then, your final binary should be in `build/bin/blender`.
 Enjoy!
 
-## Packaging as a ZPK
+<!-- ## Packaging as a ZPK
 
-This is not yet possible, but I'll naturally update this documentation when it is.
+You must have [`aqua-manager`](https://github.com/inobulles/aqua-manager) installed on your system for packaging to work.
+Files necessary for packaging are in the `package/` directory.
+`build.sh` automatically packages Blender as a ZPK file under `build/package.zpk`. -->
 
 ## Notes
 

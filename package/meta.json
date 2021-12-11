@@ -1,0 +1,74 @@
+{
+	// information about the application
+
+	"name": "Blender",
+	"version": "3.1.0 Alpha (aquaBSD)",
+	"description": "3D modelling software",
+	"keywords": ["3D", "graphics", "modelling", "CGI"],
+	"website": "https://www.blender.org/",
+	"icon": "icon.svg",
+
+	// what to do when the application is installed or updated
+
+	"extract": [
+		{
+			"src": "files",
+			"dest": "/"
+		}
+	],
+
+	// what to do when the application is run
+	
+	"start": "system",
+	"script": "default.sh",
+
+	// events (integration with really anything, e.g. aquaBSD Files)
+	// some of these events will automatically be turned into actions too
+
+	"events": {
+		"open": { // when Blender is opened on a specific file or a file is dragged onto it
+			"single": true // only able to open one file at a time
+		}
+	},
+
+	// actions (integration with launchers, e.g. aquaBSD Launchpad)
+	// in order of priority, keyword synonyms are grouped together
+
+	"actions": [
+		{
+			"name": "Open most recent",
+			"description": "Open the most recent project instead of the default startup file",
+			"keywords": [["open", "load", "start"], ["recent", "last", "latest", "recover"]],
+			"args": ["--open-last"]
+		},
+		{ // for consistency, exhibits the same behaviour as launching normally
+			"name": "New project",
+			"description": "Create a new general project",
+			"keywords": [["new", "make", "create"], "project", ["general", "normal", "regular"]]
+		},
+		{
+			"name": "New 2D animation project",
+			"description": "Create a new 2D animation project",
+			"keywords": [["new", "make", "create"], "project", "2D", ["sketch", "animation"]],
+			"args": ["--app-template", "2D_Animation"]
+		},
+		{
+			"name": "New sculpting project",
+			"description": "Create a new sculpting project",
+			"keywords": [["new", "make", "create"], "project", ["sculpting", "modelling", "clay"]],
+			"args": ["--app-template", "Sculpting"]
+		},
+		{
+			"name": "New VFX project",
+			"description": "Create a new VFX project",
+			"keywords": [["new", "make", "create"], "project", ["VFX", "visual effects", "motion tracking"]],
+			"args": ["--app-template", "VFX"]
+		},
+		{
+			"name": "New video editing project",
+			"description": "Create a new video editing project",
+			"keywords": [["new", "make", "create"], "project", ["video", "movie", "film"], "editing"],
+			"args": ["--app-template", "Video_Editing"]
+		}
+	]
+}

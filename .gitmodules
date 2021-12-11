@@ -8,11 +8,6 @@
 	url = ../blender-addons-contrib.git
 	branch = master
 	ignore = all
-[submodule "release/datafiles/locale"]
-	path = release/datafiles/locale
-	url = ../blender-translations.git
-	branch = master
-	ignore = all
 [submodule "source/tools"]
 	path = source/tools
 	url = ../blender-dev-tools.git

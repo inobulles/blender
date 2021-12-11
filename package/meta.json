@@ -1,21 +1,13 @@
 {
 	// information about the application
 
+	"unique": "blender_foundation.blender3d",
 	"name": "Blender",
 	"version": "3.1.0 Alpha (aquaBSD)",
-	"description": "3D modelling software",
-	"keywords": ["3D", "graphics", "modelling", "CGI"],
+	"description": "3D modelling, animation, rendering, and post-production software",
+	"keywords": ["3D", "graphics", "modelling", "CGI", "CG", "animation", "painting", "sculpting", "texturing", "video editing", "motion tracking", "rendering", "render engine", "cycles", "python"],
 	"website": "https://www.blender.org/",
-	"icon": "icon.svg",
-
-	// what to do when the application is installed or updated
-
-	"extract": [
-		{
-			"src": "files",
-			"dest": "/"
-		}
-	],
+	"icon": "bin/blender.svg",
 
 	// what to do when the application is run
 	
@@ -34,41 +26,41 @@
 	// actions (integration with launchers, e.g. aquaBSD Launchpad)
 	// in order of priority, keyword synonyms are grouped together
 
-	"actions": [
-		{
+	"actions": {
+		"most_recent": {
 			"name": "Open most recent",
 			"description": "Open the most recent project instead of the default startup file",
 			"keywords": [["open", "load", "start"], ["recent", "last", "latest", "recover"]],
 			"args": ["--open-last"]
 		},
-		{ // for consistency, exhibits the same behaviour as launching normally
+		"new_project": { // for consistency, exhibits the same behaviour as launching normally
 			"name": "New project",
 			"description": "Create a new general project",
 			"keywords": [["new", "make", "create"], "project", ["general", "normal", "regular"]]
 		},
-		{
+		"new_2d_anim_project": {
 			"name": "New 2D animation project",
 			"description": "Create a new 2D animation project",
 			"keywords": [["new", "make", "create"], "project", "2D", ["sketch", "animation"]],
 			"args": ["--app-template", "2D_Animation"]
 		},
-		{
+		"new_sculpting_project": {
 			"name": "New sculpting project",
 			"description": "Create a new sculpting project",
 			"keywords": [["new", "make", "create"], "project", ["sculpting", "modelling", "clay"]],
 			"args": ["--app-template", "Sculpting"]
 		},
-		{
+		"new_vfx_project": {
 			"name": "New VFX project",
 			"description": "Create a new VFX project",
 			"keywords": [["new", "make", "create"], "project", ["VFX", "visual effects", "motion tracking"]],
 			"args": ["--app-template", "VFX"]
 		},
-		{
+		"new_video_editing_project": {
 			"name": "New video editing project",
 			"description": "Create a new video editing project",
 			"keywords": [["new", "make", "create"], "project", ["video", "movie", "film"], "editing"],
 			"args": ["--app-template", "Video_Editing"]
 		}
-	]
+	}
 }

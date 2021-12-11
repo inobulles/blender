@@ -35,5 +35,11 @@ make install # don't worry, this will only install in the build directory!
 
 # package
 
-cp -r ../package package
-cp -r bin package/bin
+aqua-manager --create --type custom --path package
+
+cp -r ../package/* package
+cp -r package/scripts/* package/.package
+cp -r bin package/.package/bin
+
+aqua-manager --layout --path package
+iar --pack package/.package --output package.zpk

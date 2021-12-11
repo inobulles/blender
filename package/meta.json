@@ -3,6 +3,7 @@
 
 	"unique": "blender_foundation.blender3d",
 	"name": "Blender",
+	"organization": "Blender Foundation",
 	"version": "3.1.0 Alpha (aquaBSD)",
 	"description": "3D modelling, animation, rendering, and post-production software",
 	"keywords": ["3D", "graphics", "modelling", "CGI", "CG", "animation", "painting", "sculpting", "texturing", "video editing", "motion tracking", "rendering", "render engine", "cycles", "python"],

@@ -4,7 +4,7 @@ This repository is a fork of Blender which (will) add a few nice integrations wi
 
 ## Features & planned features
 
-- [ ] Custom build process for generating ZPK packages.
+- [x] Custom build process for generating ZPK packages.
 - [ ] Automatically follow the aquaBSD system theme.
 - [ ] Integrations with [aquaBSD Launchpad](https://github.com/inobulles/aquabsd-launchpad).
 - [ ] Smooth scrolling.
@@ -46,11 +46,11 @@ This process should only take about 10 minutes.
 Then, your final binary should be in `build/bin/blender`.
 Enjoy!
 
-<!-- ## Packaging as a ZPK
+## Packaging as a ZPK
 
 You must have [`aqua-manager`](https://github.com/inobulles/aqua-manager) installed on your system for packaging to work.
 Files necessary for packaging are in the `package/` directory.
-`build.sh` automatically packages Blender as a ZPK file under `build/package.zpk`. -->
+`build.sh` automatically packages Blender as a ZPK file under `build/package.zpk`.
 
 ## Notes
 

@@ -1479,6 +1479,8 @@ class CyclesPreferences(bpy.types.AddonPreferences):
                 col.label(text="Support is actively being worked on, however!", icon='BLANK1')
                 if sys.platform[:3] == "win":
                     col.label(text="and AMD Radeon Pro 21.Q4 driver or newer", icon='BLANK1')
+            elif device_type == 'METAL':
+                col.label(text="Requires Apple Silicon and macOS 12.0 or newer", icon='BLANK1')
             return
 
         for device in devices:

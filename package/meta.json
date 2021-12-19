@@ -8,7 +8,7 @@
 	"description": "3D modelling, animation, rendering, and post-production software",
 	"keywords": ["3D", "graphics", "modelling", "CGI", "CG", "animation", "painting", "sculpting", "texturing", "video editing", "motion tracking", "rendering", "render engine", "cycles", "python"],
 	"website": "https://www.blender.org/",
-	"icon": "bin/blender.svg",
+	"icon": "icon.svg",
 
 	// what to do when the application is run
 	

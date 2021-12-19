@@ -40,6 +40,7 @@ aqua-manager --create --type custom --path package
 cp -r ../package/* package
 cp -r package/scripts/* package/.package
 cp -r bin package/.package/bin
+cp package/.package/bin/blender.svg package/.package/icon.svg
 
 aqua-manager --layout --path package
 iar --pack package/.package --output package.zpk

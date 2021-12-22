@@ -1,0 +1,5 @@
+task:
+  arm_container:
+    image: gcc:latest
+  build_script:
+    - sh build.sh

@@ -1,5 +1,6 @@
 # generic files to ignore
 .*
+!.cirrus.yml
 
 # python temp paths
 __pycache__/

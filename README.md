@@ -8,6 +8,7 @@ This repository is a fork of Blender which (will) add a few nice integrations wi
 - [ ] Automatically follow the aquaBSD system theme.
 - [ ] Integrations with [aquaBSD Launchpad](https://github.com/inobulles/aquabsd-launchpad).
 - [ ] Smooth scrolling.
+- [ ] Use SDL as an audio backend by default instead of PulseAudio.
 
 ## Building on aquaBSD
 

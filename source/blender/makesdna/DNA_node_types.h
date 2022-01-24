@@ -95,7 +95,7 @@ typedef struct SocketDeclarationHandle SocketDeclarationHandle;
 #endif
 
 typedef struct bNodeSocket {
-  struct bNodeSocket *next, *prev, *new_sock;
+  struct bNodeSocket *next, *prev;
 
   /** User-defined properties. */
   IDProperty *prop;
@@ -106,15 +106,21 @@ typedef struct bNodeSocket {
   /** MAX_NAME. */
   char name[64];
 
-  /* XXX deprecated, only used for the Image and OutputFile nodes,
-   * should be removed at some point.
-   */
-  /** Custom storage. */
+  /** Only used for the Image and OutputFile nodes, should be removed at some point. */
   void *storage;
 
-  short type, flag;
-  /** Max. number of links. Read via nodeSocketLinkLimit,
-   * because the limit might be defined on the socket type. */
+  /**
+   * The socket's data type. #eNodeSocketDatatype.
+   */
+  short type;
+  /** #eNodeSocketFlag */
+  short flag;
+  /**
+   * Maximum number of links that can connect to the socket. Read via #nodeSocketLinkLimit, because
+   * the limit might be defined on the socket type, in which case this value does not have any
+   * effect. It is necessary to store this in the socket because it is exposed as an RNA property
+   * for custom nodes.
+   */
   short limit;
   /** Input/output type. */
   short in_out;
@@ -123,6 +129,10 @@ typedef struct bNodeSocket {
   /** Runtime type identifier. */
   char idname[64];
 
+  /**
+   * The location of the sockets, in the view-space of the node editor.
+   * \note These are runtime data-- only calculated when drawing, and could be removed from DNA.
+   */
   float locx, locy;
 
   /** Default input value used for unlinked sockets. */
@@ -245,7 +255,7 @@ typedef enum eNodeSocketFlag {
 
 /** TODO: Limit data in #bNode to what we want to see saved. */
 typedef struct bNode {
-  struct bNode *next, *prev, *new_node;
+  struct bNode *next, *prev;
 
   /** User-defined properties. */
   IDProperty *prop;
@@ -307,7 +317,7 @@ typedef struct bNode {
 
   char _pad1[4];
 
-  /** Entire boundbox (world-space). */
+  /** Entire bound-box (world-space). */
   rctf totr;
   /** Optional preview area. */
   rctf prvr;
@@ -367,7 +377,7 @@ typedef struct bNode {
 #define NODE_PREVIEW 4
 #define NODE_HIDDEN 8
 #define NODE_ACTIVE 16
-#define NODE_ACTIVE_ID 32
+// #define NODE_ACTIVE_ID 32 /* deprecated */
 /* Used to indicate which group output node is used and which viewer node is active. */
 #define NODE_DO_OUTPUT 64
 #define __NODE_GROUP_EDIT 128 /* DEPRECATED */
@@ -923,6 +933,11 @@ typedef struct NodeColorspill {
   float uspillr, uspillg, uspillb;
 } NodeColorspill;
 
+typedef struct NodeConvertColorSpace {
+  char from_color_space[64];
+  char to_color_space[64];
+} NodeConvertColorSpace;
+
 typedef struct NodeDilateErode {
   char falloff;
 } NodeDilateErode;
@@ -1264,6 +1279,13 @@ typedef struct NodeRandomValue {
   uint8_t data_type;
 } NodeRandomValue;
 
+typedef struct NodeAccumulateField {
+  /* CustomDataType. */
+  uint8_t data_type;
+  /* AttributeDomain. */
+  uint8_t domain;
+} NodeAccumulateField;
+
 typedef struct NodeAttributeRandomize {
   /* CustomDataType. */
   uint8_t data_type;
@@ -1362,6 +1384,11 @@ typedef struct NodeGeometryPointTranslate {
   /* GeometryNodeAttributeInputMode */
   uint8_t input_type;
 } NodeGeometryPointTranslate;
+
+typedef struct NodeGeometryExtrudeMesh {
+  /* GeometryNodeExtrudeMeshMode */
+  uint8_t mode;
+} NodeGeometryExtrudeMesh;
 
 typedef struct NodeGeometryObjectInfo {
   /* GeometryNodeTransformSpace. */
@@ -1480,6 +1507,11 @@ typedef struct NodeGeometryCurveSelectHandles {
   /* GeometryNodeCurveHandleMode. */
   uint8_t mode;
 } NodeGeometryCurveSelectHandles;
+
+typedef struct NodeGeometryCurvePrimitiveArc {
+  /* GeometryNodeCurvePrimitiveArcMode. */
+  uint8_t mode;
+} NodeGeometryCurvePrimitiveArc;
 
 typedef struct NodeGeometryCurvePrimitiveLine {
   /* GeometryNodeCurvePrimitiveLineMode. */
@@ -2096,6 +2128,7 @@ typedef enum GeometryNodeTriangulateQuads {
   GEO_NODE_TRIANGULATE_QUAD_FIXED = 1,
   GEO_NODE_TRIANGULATE_QUAD_ALTERNATE = 2,
   GEO_NODE_TRIANGULATE_QUAD_SHORTEDGE = 3,
+  GEO_NODE_TRIANGULATE_QUAD_LONGEDGE = 4,
 } GeometryNodeTriangulateQuads;
 
 typedef enum GeometryNodePointInstanceType {
@@ -2126,6 +2159,12 @@ typedef enum GeometryNodeDistributePointsOnFacesMode {
   GEO_NODE_POINT_DISTRIBUTE_POINTS_ON_FACES_RANDOM = 0,
   GEO_NODE_POINT_DISTRIBUTE_POINTS_ON_FACES_POISSON = 1,
 } GeometryNodeDistributePointsOnFacesMode;
+
+typedef enum GeometryNodeExtrudeMeshMode {
+  GEO_NODE_EXTRUDE_MESH_VERTICES = 0,
+  GEO_NODE_EXTRUDE_MESH_EDGES = 1,
+  GEO_NODE_EXTRUDE_MESH_FACES = 2,
+} GeometryNodeExtrudeMeshMode;
 
 typedef enum GeometryNodeRotatePointsType {
   GEO_NODE_POINT_ROTATE_TYPE_EULER = 0,
@@ -2213,6 +2252,11 @@ typedef enum GeometryNodeMeshLineCountMode {
   GEO_NODE_MESH_LINE_COUNT_TOTAL = 0,
   GEO_NODE_MESH_LINE_COUNT_RESOLUTION = 1,
 } GeometryNodeMeshLineCountMode;
+
+typedef enum GeometryNodeCurvePrimitiveArcMode {
+  GEO_NODE_CURVE_PRIMITIVE_ARC_TYPE_POINTS = 0,
+  GEO_NODE_CURVE_PRIMITIVE_ARC_TYPE_RADIUS = 1,
+} GeometryNodeCurvePrimitiveArcMode;
 
 typedef enum GeometryNodeCurvePrimitiveLineMode {
   GEO_NODE_CURVE_PRIMITIVE_LINE_MODE_POINTS = 0,
@@ -2307,6 +2351,11 @@ typedef enum GeometryNodeDeleteGeometryMode {
 typedef enum GeometryNodeRealizeInstancesFlag {
   GEO_NODE_REALIZE_INSTANCES_LEGACY_BEHAVIOR = (1 << 0),
 } GeometryNodeRealizeInstancesFlag;
+
+typedef enum GeometryNodeScaleElementsMode {
+  GEO_NODE_SCALE_ELEMENTS_UNIFORM = 0,
+  GEO_NODE_SCALE_ELEMENTS_SINGLE_AXIS = 1,
+} GeometryNodeScaleElementsMode;
 
 #ifdef __cplusplus
 }

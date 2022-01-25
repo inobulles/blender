@@ -10,6 +10,10 @@ if [ -d $build ]; then
 	read _
 fi
 
+if [ -d release/datafiles/locale ]; then
+	rmdir -p release/datafiles/locale/languages # (TODO: #2)
+fi
+
 rm -rf $build
 mkdir $build
 cd $build
@@ -17,6 +21,7 @@ cd $build
 # compile
 
 options="
+	-DWITH_NANOVDB:BOOL=OFF
 	-DWITH_SYSTEM_GLEW:BOOL=ON
 	-DWITH_XR_OPENXR:BOOL=OFF
 	-DWITH_HARU:BOOL=OFF

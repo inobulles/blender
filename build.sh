@@ -11,7 +11,7 @@ if [ -d $build ]; then
 fi
 
 if [ -d release/datafiles/locale ]; then
-	rmdir -p release/datafiles/locale/languages # (TODO: #2)
+	rm -rf release/datafiles/locale/languages # (TODO: #2)
 fi
 
 rm -rf $build
@@ -27,7 +27,7 @@ options="
 	-DWITH_HARU:BOOL=OFF
 	-DWITH_IMAGE_OPENJPEG:BOOL=OFF"
 
-cmake ../ $options
+cmake .. $options
 
 echo -n "Build environment setup. Would you like to start build? "
 read _

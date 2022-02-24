@@ -1,21 +1,5 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- *
- * The Original Code is Copyright (C) 2005 Blender Foundation.
- * All rights reserved.
- */
+/* SPDX-License-Identifier: GPL-2.0-or-later
+ * Copyright 2005 Blender Foundation. All rights reserved. */
 
 /** \file
  * \ingroup DNA
@@ -38,6 +22,7 @@ struct ID;
 struct Image;
 struct ListBase;
 struct Material;
+struct PreviewImage;
 struct Tex;
 struct bGPdata;
 struct bNodeInstanceHash;
@@ -46,7 +31,6 @@ struct bNodePreview;
 struct bNodeTreeExec;
 struct bNodeType;
 struct uiBlock;
-struct PreviewImage;
 
 #define NODE_MAXSTR 64
 
@@ -514,8 +498,10 @@ typedef struct bNodeTree {
   /** Information about how inputs and outputs of the node group interact with fields. */
   FieldInferencingInterfaceHandle *field_inferencing_interface;
 
-  /** Set init on fileread. */
-  int type, init;
+  int type;
+
+  char _pad1[4];
+
   /**
    * Sockets in groups have unique identifiers, adding new sockets always
    * will increase this counter.
@@ -598,9 +584,6 @@ typedef struct bNodeTree {
 #define NTREE_COMPOSIT 1
 #define NTREE_TEXTURE 2
 #define NTREE_GEOMETRY 3
-
-/** #NodeTree.init, flag */
-#define NTREE_TYPE_INIT 1
 
 /** #NodeTree.flag */
 #define NTREE_DS_EXPAND (1 << 0)            /* for animation editors */
@@ -1616,7 +1599,8 @@ typedef struct NodeGeometryStringToCurves {
   uint8_t align_x;
   /* GeometryNodeStringToCurvesAlignYMode */
   uint8_t align_y;
-  char _pad[1];
+  /* GeometryNodeStringToCurvesPivotMode */
+  uint8_t pivot_mode;
 } NodeGeometryStringToCurves;
 
 typedef struct NodeGeometryDeleteGeometry {
@@ -1625,6 +1609,11 @@ typedef struct NodeGeometryDeleteGeometry {
   /* GeometryNodeDeleteGeometryMode. */
   int8_t mode;
 } NodeGeometryDeleteGeometry;
+
+typedef struct NodeGeometryDuplicateElements {
+  /* AttributeDomain. */
+  int8_t domain;
+} NodeGeometryDuplicateElements;
 
 typedef struct NodeGeometrySeparateGeometry {
   /* AttributeDomain. */
@@ -1848,7 +1837,6 @@ enum {
 /* math node clamp */
 #define SHD_MATH_CLAMP 1
 
-/** Math node operations. */
 typedef enum NodeMathOperation {
   NODE_MATH_ADD = 0,
   NODE_MATH_SUBTRACT = 1,
@@ -1892,7 +1880,6 @@ typedef enum NodeMathOperation {
   NODE_MATH_SMOOTH_MAX = 39,
 } NodeMathOperation;
 
-/** Vector Math node operations. */
 typedef enum NodeVectorMathOperation {
   NODE_VECTOR_MATH_ADD = 0,
   NODE_VECTOR_MATH_SUBTRACT = 1,
@@ -1926,14 +1913,20 @@ typedef enum NodeVectorMathOperation {
   NODE_VECTOR_MATH_MULTIPLY_ADD = 26,
 } NodeVectorMathOperation;
 
-/** Boolean math node operations. */
-enum {
+typedef enum NodeBooleanMathOperation {
   NODE_BOOLEAN_MATH_AND = 0,
   NODE_BOOLEAN_MATH_OR = 1,
   NODE_BOOLEAN_MATH_NOT = 2,
-};
 
-/** Float compare node operations. */
+  NODE_BOOLEAN_MATH_NAND = 3,
+  NODE_BOOLEAN_MATH_NOR = 4,
+  NODE_BOOLEAN_MATH_XNOR = 5,
+  NODE_BOOLEAN_MATH_XOR = 6,
+
+  NODE_BOOLEAN_MATH_IMPLY = 7,
+  NODE_BOOLEAN_MATH_NIMPLY = 8,
+} NodeBooleanMathOperation;
+
 typedef enum NodeCompareMode {
   NODE_COMPARE_MODE_ELEMENT = 0,
   NODE_COMPARE_MODE_LENGTH = 1,
@@ -1951,10 +1944,8 @@ typedef enum NodeCompareOperation {
   NODE_COMPARE_NOT_EQUAL = 5,
   NODE_COMPARE_COLOR_BRIGHTER = 6,
   NODE_COMPARE_COLOR_DARKER = 7,
-
 } NodeCompareOperation;
 
-/** Float to Int node operations. */
 typedef enum FloatToIntRoundingMode {
   FN_NODE_FLOAT_TO_INT_ROUND = 0,
   FN_NODE_FLOAT_TO_INT_FLOOR = 1,
@@ -2341,6 +2332,16 @@ typedef enum GeometryNodeStringToCurvesAlignYMode {
   GEO_NODE_STRING_TO_CURVES_ALIGN_Y_BOTTOM_BASELINE = 3,
   GEO_NODE_STRING_TO_CURVES_ALIGN_Y_BOTTOM = 4,
 } GeometryNodeStringToCurvesAlignYMode;
+
+typedef enum GeometryNodeStringToCurvesPivotMode {
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_MIDPOINT = 0,
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_TOP_LEFT = 1,
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_TOP_CENTER = 2,
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_TOP_RIGHT = 3,
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_BOTTOM_LEFT = 4,
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_BOTTOM_CENTER = 5,
+  GEO_NODE_STRING_TO_CURVES_PIVOT_MODE_BOTTOM_RIGHT = 6,
+} GeometryNodeStringToCurvesPivotMode;
 
 typedef enum GeometryNodeDeleteGeometryMode {
   GEO_NODE_DELETE_GEOMETRY_MODE_ALL = 0,

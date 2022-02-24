@@ -1,18 +1,4 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- */
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup render
@@ -482,7 +468,9 @@ static TriTessFace *mesh_calc_tri_tessface(Mesh *me, bool tangent, Mesh *me_eval
   looptri = MEM_mallocN(sizeof(*looptri) * tottri, __func__);
   triangles = MEM_callocN(sizeof(TriTessFace) * tottri, __func__);
 
-  const float(*precomputed_normals)[3] = CustomData_get_layer(&me->pdata, CD_NORMAL);
+  const float(*precomputed_normals)[3] = BKE_mesh_poly_normals_are_dirty(me) ?
+                                             NULL :
+                                             BKE_mesh_poly_normals_ensure(me);
   const bool calculate_normal = precomputed_normals ? false : true;
 
   if (precomputed_normals != NULL) {
@@ -512,9 +500,9 @@ static TriTessFace *mesh_calc_tri_tessface(Mesh *me, bool tangent, Mesh *me_eval
     triangles[i].mverts[0] = &mvert[me->mloop[lt->tri[0]].v];
     triangles[i].mverts[1] = &mvert[me->mloop[lt->tri[1]].v];
     triangles[i].mverts[2] = &mvert[me->mloop[lt->tri[2]].v];
-    triangles[i].vert_normals[0] = &vert_normals[me->mloop[lt->tri[0]].v][0];
-    triangles[i].vert_normals[1] = &vert_normals[me->mloop[lt->tri[1]].v][1];
-    triangles[i].vert_normals[2] = &vert_normals[me->mloop[lt->tri[2]].v][2];
+    triangles[i].vert_normals[0] = vert_normals[me->mloop[lt->tri[0]].v];
+    triangles[i].vert_normals[1] = vert_normals[me->mloop[lt->tri[1]].v];
+    triangles[i].vert_normals[2] = vert_normals[me->mloop[lt->tri[2]].v];
     triangles[i].is_smooth = (mp->flag & ME_SMOOTH) != 0;
 
     if (tangent) {

@@ -1,21 +1,5 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- *
- * The Original Code is Copyright (C) 2001-2002 by NaN Holding BV.
- * All rights reserved.
- */
+/* SPDX-License-Identifier: GPL-2.0-or-later
+ * Copyright 2001-2002 NaN Holding BV. All rights reserved. */
 
 /** \file
  * \ingroup bke
@@ -32,6 +16,7 @@
 #include "BLI_ghash.h"
 #include "BLI_index_range.hh"
 #include "BLI_math.h"
+#include "BLI_math_vec_types.hh"
 #include "BLI_utildefines.h"
 
 #include "BLT_translation.h"
@@ -59,6 +44,7 @@
 #include "BKE_lib_query.h"
 #include "BKE_main.h"
 #include "BKE_object.h"
+#include "BKE_spline.hh"
 #include "BKE_vfont.h"
 
 #include "DEG_depsgraph.h"
@@ -68,6 +54,7 @@
 
 #include "BLO_read_write.h"
 
+using blender::float3;
 using blender::IndexRange;
 
 /* globals */
@@ -306,14 +293,14 @@ static void curve_blend_read_expand(BlendExpander *expander, ID *id)
   BLO_expand(expander, cu->textoncurve);
 }
 
-IDTypeInfo IDType_ID_CU = {
-    /* id_code */ ID_CU,
-    /* id_filter */ FILTER_ID_CU,
-    /* main_listbase_index */ INDEX_ID_CU,
+IDTypeInfo IDType_ID_CU_LEGACY = {
+    /* id_code */ ID_CU_LEGACY,
+    /* id_filter */ FILTER_ID_CU_LEGACY,
+    /* main_listbase_index */ INDEX_ID_CU_LEGACY,
     /* struct_size */ sizeof(Curve),
     /* name */ "Curve",
     /* name_plural */ "curves",
-    /* translation_context */ BLT_I18NCONTEXT_ID_CURVE,
+    /* translation_context */ BLT_I18NCONTEXT_ID_CURVE_LEGACY,
     /* flags */ IDTYPE_FLAGS_APPEND_IS_REUSABLE,
     /* asset_type_info */ nullptr,
 
@@ -419,7 +406,7 @@ Curve *BKE_curve_add(Main *bmain, const char *name, int type)
   Curve *cu;
 
   /* We cannot use #BKE_id_new here as we need some custom initialization code. */
-  cu = (Curve *)BKE_libblock_alloc(bmain, ID_CU, name, 0);
+  cu = (Curve *)BKE_libblock_alloc(bmain, ID_CU_LEGACY, name, 0);
 
   BKE_curve_init(cu, type);
 
@@ -453,7 +440,7 @@ short BKE_curve_type_get(const Curve *cu)
   }
 
   if (!cu->type) {
-    type = OB_CURVE;
+    type = OB_CURVES_LEGACY;
 
     LISTBASE_FOREACH (Nurb *, nu, &cu->nurb) {
       if (nu->pntsv > 1) {
@@ -486,7 +473,7 @@ void BKE_curve_type_test(Object *ob)
 {
   ob->type = BKE_curve_type_get((Curve *)ob->data);
 
-  if (ob->type == OB_CURVE) {
+  if (ob->type == OB_CURVES_LEGACY) {
     Curve *cu = (Curve *)ob->data;
     if (CU_IS_2D(cu)) {
       BKE_curve_dimension_update(cu);
@@ -503,7 +490,10 @@ BoundBox *BKE_curve_boundbox_get(Object *ob)
     float min[3], max[3];
 
     INIT_MINMAX(min, max);
-    BKE_curve_minmax(cu, true, min, max);
+    if (!BKE_curve_minmax(cu, true, min, max)) {
+      copy_v3_fl(min, -1.0f);
+      copy_v3_fl(max, 1.0f);
+    }
 
     if (ob->runtime.bb == nullptr) {
       ob->runtime.bb = (BoundBox *)MEM_mallocN(sizeof(*ob->runtime.bb), __func__);
@@ -899,7 +889,7 @@ float BKE_nurb_calc_length(const Nurb *nu, int resolution)
         pntsit = points + 3;
       }
 
-      while (--b) {
+      while (--b > 0) {
         length += len_v3v3(prevpntsit, pntsit);
         prevpntsit = pntsit;
         pntsit += 3;

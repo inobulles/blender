@@ -1,21 +1,5 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- *
- * The Original Code is Copyright (C) 2006 by Nicholas Bishop
- * All rights reserved.
- */
+/* SPDX-License-Identifier: GPL-2.0-or-later
+ * Copyright 2006 by Nicholas Bishop. All rights reserved. */
 
 /** \file
  * \ingroup edsculpt
@@ -376,14 +360,6 @@ typedef enum SculptFilterOrientation {
   SCULPT_FILTER_ORIENTATION_VIEW = 2,
 } SculptFilterOrientation;
 
-/* Defines how transform tools are going to apply its displacement. */
-typedef enum SculptTransformDisplacementMode {
-  /* Displaces the elements from their original coordinates. */
-  SCULPT_TRANSFORM_DISPLACEMENT_ORIGINAL = 0,
-  /* Displaces the elements incrementally from their previous position. */
-  SCULPT_TRANSFORM_DISPLACEMENT_INCREMENTAL = 1,
-} SculptTransformDisplacementMode;
-
 #define SCULPT_CLAY_STABILIZER_LEN 10
 
 typedef struct AutomaskingSettings {
@@ -451,9 +427,6 @@ typedef struct FilterCache {
   int *prev_face_set;
 
   int active_face_set;
-
-  /* Transform. */
-  SculptTransformDisplacementMode transform_displacement_mode;
 
   /* Auto-masking. */
   AutomaskingCache *automasking;
